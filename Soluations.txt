@@ -1,0 +1,4 @@
+//rxjs
+sudo npm install -g typescript@latest
+npm i rxjs@6.3.3 rxjs-compat@6.3.3 promise-polyfill --save
+----------------------------------------------------------------
