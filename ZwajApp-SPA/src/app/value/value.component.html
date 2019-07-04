@@ -1,3 +1,9 @@
 <p  *ngFor="let value of values">
   {{value.id}} , {{value.name}}
 </p>
+<div class="form-group">
+    <label for="selectValue"></label>
+    <select class="form-control" name="selectValue" id="selectValue">
+      <option *ngFor="let value of valuesFromRegister" [value] = "value">{{value.name}}</option>
+    </select>
+  </div>
