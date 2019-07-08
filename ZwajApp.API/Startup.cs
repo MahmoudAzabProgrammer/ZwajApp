@@ -15,6 +15,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Net;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using ZwajApp.API.Helpers;
 
 namespace ZwajApp.API
 {
@@ -58,9 +62,22 @@ namespace ZwajApp.API
             }
             else
             {
-                app.UseHsts();
+                app.UseExceptionHandler(BuilderExtensions =>
+                {
+                    BuilderExtensions.Run(async context => {
+                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        var error = context.Features.Get<IExceptionHandlerFeature>();
+                        if(error != null)
+                        {
+                            context.Response.addApplicationError(error.Error.Message);
+                            await context.Response.WriteAsync(error.Error.Message);
+                            
+                        }
+                        });
+                });
+                //app.UserHsts();
             }
-
+            // app.UseHttpRedirection();
             app.UseHttpsRedirection();
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseAuthentication();
