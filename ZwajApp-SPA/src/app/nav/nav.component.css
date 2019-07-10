@@ -13,3 +13,25 @@
     background:pink !important
       }
 
+.dropdown-toggle , .dropdown-item {
+  cursor: pointer;
+}
+
+.mnav-link:hover , .mnav-link:focus , .nav-link:focus {
+  text-decoration: none;
+  color: pink !important;
+}
+.mnav-link{
+  color: black !important;
+  letter-spacing: 0.5px;
+  font-weight: bold;
+  font-family: 'JF Flat';
+  font-size: 1.0 rem;
+
+}
+input{
+  font-size: 17px;
+  font-weight: bold;
+  padding: 5px;
+  
+}
