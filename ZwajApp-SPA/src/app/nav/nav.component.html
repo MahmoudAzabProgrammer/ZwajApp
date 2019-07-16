@@ -35,8 +35,11 @@ font-family:ToyorAljanah;font-size:2.25rem;font-weight:bolder" class="navbar-bra
           <a class="dropdown-item mnav-link" (click)="loggedOut()"><i class="fa fa-sign-out" ></i>
           تسجبل الخروج</a>
         </div>
-  
+      
     </div>
+    <span *ngIf="loggedIn()">
+      <img src="{{photoUrl}}" alt="" srcset="">
+    </span>
 
   <form *ngIf="!loggedIn()" (ngSubmit)="login()" #loginForm="ngForm" class="ml-5 form-inline my-2 my-lg-0">
     <input #username="ngModel" name="username" required class="form-control mr-sm-2" type="text" [(ngModel)]="model.username" placeholder="إسم المشترك">

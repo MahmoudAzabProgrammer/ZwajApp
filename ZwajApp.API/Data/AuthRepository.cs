@@ -16,7 +16,7 @@ namespace ZwajApp.API.Data
         }
         public async Task<User> Login (string username, string password)
         {
-           var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+           var user = await _context.Users.Include(p => p.Photos).FirstOrDefaultAsync(x => x.Username == username);
            if(user == null) return null;
            if(!verfiyPasswordHash(password , user.PassswordSalt , user.PasswordHash ))
            return null;
