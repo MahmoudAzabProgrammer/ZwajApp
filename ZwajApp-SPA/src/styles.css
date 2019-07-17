@@ -5,7 +5,8 @@
 @import "~font-awesome/css/font-awesome.min.css";
 @import "~alertifyjs/build/css/alertify.min.css";
 @import "~alertifyjs/build/css/themes/bootstrap.min.css";
-@import url("assets/styles.css");
+@import "~ngx-bootstrap/datepicker/bs-datepicker.css";
+@import url("assets/Styles.css");
 
 /*@import url(http://fonts.googleapis.com/earlyaccrss/droidarbickufi.css);*/
 @font-face { font-family: "JF-Flat"; src: url("./assets/fonts/JF-Flat-Regular.ttf"); }

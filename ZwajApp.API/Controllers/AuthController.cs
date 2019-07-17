@@ -35,13 +35,13 @@ namespace ZwajApp.API.Controllers
             userForRegisterDto.Username = userForRegisterDto.Username.ToLower();
             if (await _repo.UserExists(userForRegisterDto.Username))
                 return BadRequest("هذا المستخدم مسجل من فبل");
-            var userToCreate = new User
-            {
-                Username = userForRegisterDto.Username
-            };
+            var userToCreate = _mapper.Map<User>(userForRegisterDto);
             var createdUser = await _repo.Register(userToCreate, userForRegisterDto.Password);
-            return StatusCode(201);
+            var userToReturn = _mapper.Map<UserForDetailsDto>(createdUser);
+            return CreatedAtRoute("GetUser" , new { 
+                Controller = "Users" , id = createdUser.Id} ,userToReturn);
         }
+        
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserForLoginDto userForLoginDto)
@@ -70,7 +70,6 @@ namespace ZwajApp.API.Controllers
                 token = tokenHandler.WriteToken(token),
                 user
             });
-
         }
     }
 }

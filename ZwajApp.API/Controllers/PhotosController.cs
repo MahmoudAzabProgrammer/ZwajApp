@@ -110,7 +110,7 @@ namespace ZwajApp.API.Controllers
             return Unauthorized();
             var photo = await _repo.GetPhoto(id);
             if(photo.IsMain)
-            return BadRequest("هذه هى الصوره الاساسيه بالفعل");
+            return BadRequest("لا يمكن حذف الصوره الاساسيه");
             if(photo.PublicId != null){
                var deleteParams = new DeletionParams(photo.PublicId);
                var result = this._cloudinary.Destroy(deleteParams);
