@@ -12,6 +12,12 @@ import { NgxGalleryOptions, NgxGalleryImage, NgxGalleryAnimation } from 'ngx-gal
 })
 export class MemberDetailComponent implements OnInit {
   user: User;
+  created: string;
+  age: string;
+  showIntro: boolean = true;
+  showLook: boolean = true;
+  showInterest: boolean = true;
+  options = {weekday: 'long', year: 'numeric' , month: 'long' , day: 'numeric'};
   galleryOptions: NgxGalleryOptions[];
   galleryImages: NgxGalleryImage[];
 
@@ -20,6 +26,11 @@ export class MemberDetailComponent implements OnInit {
   ngOnInit() {
     this.route.data.subscribe(data =>{
       this.user = data['user'];
+      this.created = new Date(this.user.created).toLocaleString('ar-EG' , this.options).replace('،','');
+      this.age = this.user.age.toLocaleString('ar-EG');
+      this.showIntro = true;
+      this.showLook = true;
+      this.showInterest = true;
     });
     this.galleryOptions = [{
       width: '500px' , height: '500px' , imagePercent: 100 , thumbnailsColumns: 4 , imageAnimation: NgxGalleryAnimation.Slide , preview: false
