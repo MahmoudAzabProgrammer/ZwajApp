@@ -16,6 +16,7 @@ export class MemberListComponent implements OnInit {
   genderList = [{ value: 'رجل' , display: 'رجال' } , { value: 'إمرأة' , display: 'نساء' } ];
   userParams: any = {};
   pagination: Pagination;
+  search: boolean = false;
   constructor(private userService: UserService , private alerify: AlertifyService , private route: ActivatedRoute) { }
 
   ngOnInit() {
@@ -43,12 +44,16 @@ export class MemberListComponent implements OnInit {
   }
 
   loadUsers() {
+    if(!this.search) {
+      this.pagination.currentPage = 1;
+    }
     this.userService.getUsers(this.pagination.currentPage, this.pagination.itemsPerpage, this.userParams).subscribe(
       (paginationResult: PaginationResult<User[]>) => {
         this.users = paginationResult.result;
         this.pagination = paginationResult.pagination;
       },
       error => this.alerify.error(error)
-      );}
+      );
+    }
 
 }

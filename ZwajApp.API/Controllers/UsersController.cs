@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using ZwajApp.API.Data;
 using ZwajApp.API.Dtos;
 using ZwajApp.API.Helpers;
+using ZwajApp.API.Models;
 
 namespace ZwajApp.API.Controllers
 {
@@ -52,7 +53,8 @@ namespace ZwajApp.API.Controllers
         }
         
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id , UserForUpdateDto userForUpdateDto){
+        public async Task<IActionResult> UpdateUser(int id , UserForUpdateDto userForUpdateDto)
+        {
             if(id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             return Unauthorized();
             var userFromRepo = await _repo.GetUser(id);
@@ -61,6 +63,28 @@ namespace ZwajApp.API.Controllers
                 return NoContent();
             }
             throw new Exception($"حدثت مشكله فى تعديل بيانات المشترك {id}");
+        }
+
+        [HttpPost("{id}/like/{recipientId}")]
+        public async Task<IActionResult> LikeUser (int id, int recipientId)
+        {
+            if(id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+            return Unauthorized();
+            var like = await _repo.GetLike(id, recipientId);
+            if(like != null)
+            return BadRequest("لقد قمت بالاعجاب بالمشترك من قبل");
+            if(await _repo.GetUser(recipientId) == null)
+            return NotFound();
+            like = new Like{
+                LikerId = id,
+                LikeeId = recipientId
+            };
+            _repo.Add<Like>(like);
+            if(await _repo.SaveAll())
+            return Ok();
+            return BadRequest("فشل فى الاعجاب");
+        
+            
         }
     }
 
