@@ -2,9 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
-import { User } from '../_models/user';
+import { User } from '../_models/User';
 import { PaginationResult } from '../_models/Pagination';
 import { map } from 'rxjs/operators';
+import { Message } from '../_models/Message';
+
 
 
 @Injectable({
@@ -15,12 +17,12 @@ export class UserService {
 baseUrl = environment.apiUrl + 'users/';
 constructor(private http: HttpClient) { }
 
-getUsers(page? , itemsPerpage?, userParams?, likeParam?): Observable<PaginationResult<User[]>> {
+getUsers(page? , itemsPerPage?, userParams?, likeParam?): Observable<PaginationResult<User[]>> {
   const paginationResult: PaginationResult<User[]> = new PaginationResult<User[]>();
   let params = new HttpParams();
-  if(page != null && itemsPerpage != null){
+  if(page != null && itemsPerPage != null){
     params = params.append('pageNumber', page);
-    params = params.append('pageSize', itemsPerpage);
+    params = params.append('pageSize', itemsPerPage);
   }
   if(userParams != null) {
     params = params.append('minAge', userParams.minAge);
@@ -28,16 +30,16 @@ getUsers(page? , itemsPerpage?, userParams?, likeParam?): Observable<PaginationR
     params = params.append('gender', userParams.gender);
     params = params.append('orderBy', userParams.orderBy);
   }
-  if(likeParam === 'Likers'){
+  if(likeParam === 'Likers') {
     params = params.append('Likers', 'true');
   }
-  if(likeParam === 'Likees'){
+  if(likeParam === 'Likees') {
     params = params.append('Likees', 'true');
   }
   return this.http.get<User[]>(this.baseUrl, { observe: 'response', params }).pipe(map(response => {
     paginationResult.result = response.body;
     if(response.headers.get('Pagination') != null) {
-      paginationResult.pagination = JSON.parse(response.headers.get('Pagination'))
+      paginationResult.pagination = JSON.parse(response.headers.get('Pagination'));
     }
     return paginationResult;
   }));
@@ -56,6 +58,38 @@ deletePhoto(userId: number , id: number){
 }
 sendLike(id: number, recipiented: number){
   return this.http.post(this.baseUrl + id + '/like/' + recipiented, {});
+}
+getMessages(id: number, page?,itemsPerPage?, messageType?) {
+  const paginationResult: PaginationResult<Message[]> = new PaginationResult<Message[]>();
+  let params = new HttpParams();
+  params = params.append('messageType', messageType);
+  if(page != null && itemsPerPage != null){
+    params = params.append('pageNumber', page);
+    params = params.append('pageSize', itemsPerPage);
+  }
+  return this.http.get<Message[]>(this.baseUrl+id+'/messages', { observe: 'response', params}).pipe(
+    map(response => { paginationResult.result = response.body;
+      if(response.headers.get('Pagination') != null){
+        paginationResult.pagination = JSON.parse(response.headers.get('Pagination'));
+      }
+      return paginationResult;
+    } )
+  );
+}
+getConversation(id: number, recipientId: number) {
+  return this.http.get<Message[]>(this.baseUrl + id + '/messages/chat/' + recipientId);
+}
+sendMessage(id: number, message: Message){
+  return this.http.post(this.baseUrl + id + '/messages', message);
+}
+getUnreadCount(userId){
+  return this.http.get(this.baseUrl + userId + '/messages/count');
+}
+markAsRead(userId: number , messageId: number){
+  return this.http.post(this.baseUrl + userId + '/messages/read/' + messageId , {}).subscribe();
+}
+deleteMessage(id: number, userId: number) {
+  return this.http.post(this.baseUrl + userId + '/messages/'+ id, {});
 }
 
 }

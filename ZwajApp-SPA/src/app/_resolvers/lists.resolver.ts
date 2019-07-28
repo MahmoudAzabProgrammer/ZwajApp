@@ -1,4 +1,4 @@
-import { User } from '../_models/user';
+import { User } from '../_models/User';
 import { Injectable } from '@angular/core';
 import { Resolve, Router, ActivatedRouteSnapshot } from '@angular/router';
 import { UserService } from '../_services/user.service';
@@ -8,21 +8,21 @@ import { catchError } from 'rxjs/operators';
 
 @Injectable()
 
-export class ListResolver  implements Resolve<User[]> {
+export class ListResolver implements Resolve<User[]> {
     pageNumber = 1;
     pageSize = 6;
     likeParam = 'Likers';
 
-    constructor(private userService: UserService , private route: Router , private alerify: AlertifyService){}
+    constructor(private userService: UserService, private router: Router, private alertify: AlertifyService) {}
 
     resolve(route: ActivatedRouteSnapshot): Observable<User[]> {
         return this.userService.getUsers(this.pageNumber, this.pageSize, null, this.likeParam).pipe(
             catchError(error => {
-                this.alerify.error('يوجد مشكله فى عرض البيانات');
-                this.route.navigate(['']);
+                this.alertify.error('يوجد مشكله فى عرض البيانات');
+                this.router.navigate(['']);
                 return of(null);
             })
-        )
+        );
          
         }
     }

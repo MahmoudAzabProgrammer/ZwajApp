@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, HostListener } from '@angular/core';
-import { User } from 'src/app/_models/user';
+import { User } from 'src/app/_models/User';
 import { ActivatedRoute } from '@angular/router';
 import { NgForm } from '@angular/forms';
 import { AlertifyService } from 'src/app/_services/alertify.service';

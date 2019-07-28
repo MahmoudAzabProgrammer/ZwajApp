@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../_services/user.service';
 import { AlertifyService } from '../../_services/alertify.service';
-import { User } from '../../_models/user';
+import { User } from '../../_models/User';
 import { ActivatedRoute } from '@angular/router';
 import { Pagination, PaginationResult } from 'src/app/_models/Pagination';
 
@@ -47,7 +47,7 @@ export class MemberListComponent implements OnInit {
     if(!this.search) {
       this.pagination.currentPage = 1;
     }
-    this.userService.getUsers(this.pagination.currentPage, this.pagination.itemsPerpage, this.userParams).subscribe(
+    this.userService.getUsers(this.pagination.currentPage, this.pagination.itemsPerPage, this.userParams).subscribe(
       (paginationResult: PaginationResult<User[]>) => {
         this.users = paginationResult.result;
         this.pagination = paginationResult.pagination;

@@ -30,6 +30,14 @@ namespace ZwajApp.API.Helpers
             CreateMap<Photo , PhotoForReturnDto>();
             CreateMap<PhotoForCreateDto , Photo>();
             CreateMap<UserForRegisterDto , User>();
+            CreateMap<MessageForCreationDto,Message>();
+            CreateMap<Message,MessageToReturnDto>()
+            .ForMember(dest => dest.SenderPhotoUrl , option => { option.MapFrom(src => src.Sender.Photos.FirstOrDefault(p => p.IsMain).Url);})
+            .ForMember(dest => dest.RecipientPhotoUrl , option => { option.MapFrom(src => src.Recipient.Photos.FirstOrDefault(p => p.IsMain).Url);});
+
+
+
+
             
         }
     }

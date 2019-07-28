@@ -1,11 +1,11 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Photo } from 'src/app/_models/photo';
+import { Photo } from 'src/app/_models/Photo';
 import { FileUploader } from 'ng2-file-upload';
 import { environment } from 'src/environments/environment';
 import { AuthService } from 'src/app/_services/auth.service';
 import { AlertifyService } from 'src/app/_services/alertify.service';
 import { UserService } from 'src/app/_services/user.service';
-import { User } from 'src/app/_models/user';
+import { User } from 'src/app/_models/User';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({

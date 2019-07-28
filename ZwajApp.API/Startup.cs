@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using ZwajApp.API.Helpers;
 using AutoMapper;
+using ZwajApp.API.Models;
 
 namespace ZwajApp.API
 {
@@ -42,6 +43,7 @@ namespace ZwajApp.API
             });
             
             services.AddCors();
+            services.AddSignalR();
             services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
             services.AddAutoMapper();
             services.AddTransient<TrialData>();
@@ -89,7 +91,10 @@ namespace ZwajApp.API
             // app.UseHttpRedirection();
             //trialData.TrialUsers();
             app.UseHttpsRedirection();
-            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials());
+            app.UseSignalR(routes => {
+                routes.MapHub<ChatHub>("/chat");
+            });
             app.UseAuthentication();
             app.UseMvc();
         }

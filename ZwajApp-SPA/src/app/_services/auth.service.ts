@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import {JwtHelperService} from '@auth0/angular-jwt';
 import { environment } from 'src/environments/environment';
-import { User } from '../_models/user';
+import { User } from '../_models/User';
 import { BehaviorSubject } from 'rxjs';
-
+import { HubConnectionBuilder, HubConnection } from '@aspnet/signalr';
 
 
 @Injectable({
@@ -16,8 +16,11 @@ export class AuthService {
   baseUrl = environment.apiUrl + 'auth/';
   decodedToken: any;
   currentUser: User;
-photoUrl = new BehaviorSubject<string>('../../assets/User1.png');
-currentPhotoUrl = this.photoUrl.asObservable();
+  photoUrl = new BehaviorSubject<string>('../../assets/User1.png');
+  currentPhotoUrl = this.photoUrl.asObservable();
+  unreadCount = new BehaviorSubject<string>('');
+  latestUnreadCount = this.unreadCount.asObservable();
+  hubConnection: HubConnection = new HubConnectionBuilder().withUrl("http://localhost:5000/chat").build();
 
 constructor(private http: HttpClient) { }
 

@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { User } from 'src/app/_models/user';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { User } from 'src/app/_models/User';
 import { UserService } from 'src/app/_services/user.service';
 import { AlertifyService } from 'src/app/_services/alertify.service';
 import { ActivatedRoute } from '@angular/router';
 import { NgxGalleryOptions, NgxGalleryImage, NgxGalleryAnimation } from 'ngx-gallery';
+import { TabsetComponent } from 'ngx-bootstrap';
+import { AuthService } from 'src/app/_services/auth.service';
 
 @Component({
   selector: 'app-member-detail',
@@ -11,6 +13,7 @@ import { NgxGalleryOptions, NgxGalleryImage, NgxGalleryAnimation } from 'ngx-gal
   styleUrls: ['./member-detail.component.css']
 })
 export class MemberDetailComponent implements OnInit {
+  @ViewChild('memberTabs') memberTabs: TabsetComponent;
   user: User;
   created: string;
   age: string;
@@ -21,21 +24,27 @@ export class MemberDetailComponent implements OnInit {
   galleryOptions: NgxGalleryOptions[];
   galleryImages: NgxGalleryImage[];
 
-  constructor(private userService: UserService , private alertify: AlertifyService , private route: ActivatedRoute ) { }
+  constructor(private authService: AuthService, private userService: UserService , private alertify: AlertifyService , private route: ActivatedRoute ) { }
 
   ngOnInit() {
-    this.route.data.subscribe(data =>{
+    this.route.data.subscribe(data => {
       this.user = data['user'];
-      this.created = new Date(this.user.created).toLocaleString('ar-EG' , this.options).replace('،','');
-      this.age = this.user.age.toLocaleString('ar-EG');
-      this.showIntro = true;
-      this.showLook = true;
-      this.showInterest = true;
     });
+    this.route.queryParams.subscribe(
+      params => {
+        const selectTab = params['tab'];
+        this.memberTabs.tabs[selectTab > 0 ? selectTab : 0].active = true;
+      }
+    );
     this.galleryOptions = [{
       width: '500px' , height: '500px' , imagePercent: 100 , thumbnailsColumns: 4 , imageAnimation: NgxGalleryAnimation.Slide , preview: false
     }]
     this.galleryImages = this.getImages();
+    this.created = new Date(this.user.created).toLocaleString('ar-EG' , this.options).replace('،','');
+    this.age = this.user.age.toLocaleString('ar-EG');
+    this.showIntro = true;
+    this.showLook = true;
+    this.showInterest = true;
   }
   getImages(){
     const imagesUrls = [];
@@ -46,9 +55,14 @@ export class MemberDetailComponent implements OnInit {
         medium: this.user.photos[i].url,
         large: this.user.photos[i].url,
       })
-      
-    };
+    }
     return imagesUrls;
+  }
+  selectTab(tabId: number){
+    this.memberTabs.tabs[tabId].active = true;
+  }
+  deselect(){
+    this.authService.hubConnection.stop();
   }
   /*
   loadUser(){

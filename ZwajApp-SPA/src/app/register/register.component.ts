@@ -5,7 +5,7 @@ import { FormGroup, ControlContainer, FormControl, Validators, FormBuilder } fro
 import { BsDatepickerConfig, BsLocaleService } from 'ngx-bootstrap';
 import { defineLocale } from 'ngx-bootstrap/chronos';
 import { arLocale } from 'ngx-bootstrap/locale';
-import { User } from '../_models/user';
+import { User } from '../_models/User';
 import { Router } from '@angular/router';
 defineLocale('ar', arLocale);
 
