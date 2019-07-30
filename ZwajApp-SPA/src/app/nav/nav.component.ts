@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { UserService } from '../_services/user.service';
 import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr';
 
+
 @Component({
   selector: 'app-nav',
   templateUrl: './nav.component.html',
@@ -16,19 +17,23 @@ export class NavComponent implements OnInit {
   count: string;
   hubConnection: HubConnection;
 
+
   constructor(public authService: AuthService, private userService: UserService, private alertify: AlertifyService , private router: Router) { }
 
   ngOnInit() {
     this.authService.currentPhotoUrl.subscribe(
-      photoUrl => this.photoUrl = photoUrl
-    );
-    this.userService.getUnreadCount(this.authService.decodedToken.nameid).subscribe(
-      result => { this.authService.unreadCount.next(result.toString());
-      this.authService.latestUnreadCount.subscribe(
-        result => { this.count = result;}
+      photoUrl => this.photoUrl = photoUrl);
+    if(this.loggedIn){
+      this.userService.getUnreadCount(this.authService.decodedToken.nameid).subscribe(
+        result => { this.authService.unreadCount.next(result.toString());
+        this.authService.latestUnreadCount.subscribe(
+          result => { this.count = result; }
+        );
+        }
       );
-      }
-    );
+      this.getPaymentForUser();
+    }
+    
     this.hubConnection = new HubConnectionBuilder().withUrl("http://localhost:5000/chat").build();
     this.hubConnection.start();
     this.hubConnection.on('count', () => {
@@ -47,6 +52,7 @@ export class NavComponent implements OnInit {
       this.userService.getUnreadCount(this.authService.decodedToken.nameid).subscribe(result => {
       this.authService.unreadCount.next(result.toString());
       this.authService.latestUnreadCount.subscribe(result =>{ this.count = result; });
+      this.getPaymentForUser();
              });	},
       
       error => { this.alertify.error(error) },
@@ -55,15 +61,25 @@ export class NavComponent implements OnInit {
   }
   loggedIn(){
     return this.authService.loggedIn();
-
-    
   }
   loggedOut(){
+    
     localStorage.removeItem('token');
+    this.authService.paid = false;
     localStorage.removeItem('user');
     this.authService.decodedToken = null;
     this.authService.currentUser = null;
-   this.alertify.message('تم الخروج');
-   this.router.navigate(['']);
+    this.alertify.message('تم الخروج');
+    this.router.navigate(['']);
+  }
+  getPaymentForUser(){
+    this.userService.getPaymentForUser(this.authService.currentUser.id).subscribe(
+      result => {
+        if(result != null)
+          this.authService.paid = true;
+        else
+          this.authService.paid = false;
+      }
+    );
   }
 }

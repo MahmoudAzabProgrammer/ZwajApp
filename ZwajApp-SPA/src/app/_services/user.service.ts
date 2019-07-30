@@ -89,7 +89,12 @@ markAsRead(userId: number , messageId: number){
   return this.http.post(this.baseUrl + userId + '/messages/read/' + messageId , {}).subscribe();
 }
 deleteMessage(id: number, userId: number) {
-  return this.http.post(this.baseUrl + userId + '/messages/'+ id, {});
+  return this.http.post(this.baseUrl + userId + '/messages/' + id, {});
 }
-
+charge(userId: number, stripeToken: string) {
+  return this.http.post(this.baseUrl + userId + '/charge/' + stripeToken, {});
+}
+getPaymentForUser(userId: number){
+  return this.http.get(this.baseUrl + userId + '/payment');
+}
 }

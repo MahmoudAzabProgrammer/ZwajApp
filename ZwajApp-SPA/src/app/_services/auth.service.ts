@@ -21,7 +21,7 @@ export class AuthService {
   unreadCount = new BehaviorSubject<string>('');
   latestUnreadCount = this.unreadCount.asObservable();
   hubConnection: HubConnection = new HubConnectionBuilder().withUrl("http://localhost:5000/chat").build();
-
+  paid: boolean = false;
 constructor(private http: HttpClient) { }
 
 changeMemberPhoto(newPhotoUrl: string) {
