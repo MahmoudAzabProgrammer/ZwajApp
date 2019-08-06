@@ -11,24 +11,6 @@ img.img-thumbnail{
     margin-top: 1px;
     border-radius: 5px !important;
   }
-.card{
-    border-width: 2px;
-    border-style: solid;
-    border-radius: 16px 16px 0 0/13px 17px 16px 16px; 
-}
-.nv-file-over{
-    border: dashed 5px #E95420 ;
-}
-  .progress{
-    height: 2rem;
-    border-width: 2px;
-    border-style: solid;
-    border-radius: 16px 16px 0 0/13px 17px 16px 16px;
-    
-  }
-  .progress-bar{
-    background-color:darkgreen;
-  }
 
   .btn-up {
        border-radius: 16px 16px 0 0/13px 17px 16px 16px !important; 
@@ -36,21 +18,10 @@ img.img-thumbnail{
   .btn-down {
     border-radius: 0px 0px 16px 16px/16px 16px 16px 16px !important; 
 }
-.not-approved {
-  opacity: 0.4;
-}
 
-.img-wrapper {
-  position: relative;
-}
-
-.img-text {
-  position: absolute;
-  bottom: 50%;
+h4{
   font-family:'Tajawal' !important;
-  font-size:1.0rem !important;
+  font-size:1.1rem !important;
   text-shadow: 1px 1px 2px rgb(248, 244, 244), 0 0 25px rgb(253, 253, 251), 0 0 5px rgb(248, 244, 244);
 }
 
- 
-  

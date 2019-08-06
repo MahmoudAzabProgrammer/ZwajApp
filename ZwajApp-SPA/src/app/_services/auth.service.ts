@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 import { User } from '../_models/User';
 import { BehaviorSubject } from 'rxjs';
 import { HubConnectionBuilder, HubConnection } from '@aspnet/signalr';
+import { element } from '@angular/core/src/render3/instructions';
 
 
 @Injectable({
@@ -53,5 +54,17 @@ login(model: any) {
         return false;
       }
      
+    }
+    roleMatch(allowRoles: Array<String>): boolean{
+      let isMatch = false;
+      const userRoles = this.decodedToken.role as Array<String>;
+      allowRoles.forEach(element =>{
+        if(userRoles.includes(element)){
+          isMatch = true;
+          return;
+
+        }
+      });
+      return isMatch;
     }
     }

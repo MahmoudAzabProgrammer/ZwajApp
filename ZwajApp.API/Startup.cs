@@ -22,6 +22,9 @@ using ZwajApp.API.Helpers;
 using AutoMapper;
 using ZwajApp.API.Models;
 using Stripe;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace ZwajApp.API
 {
@@ -38,20 +41,19 @@ namespace ZwajApp.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<DataContext>(x=>x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
-            .AddJsonOptions(option =>{
-                option.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            IdentityBuilder identityBuilder = services.AddIdentityCore<User> (opt => {
+                opt.Password.RequireDigit = false;
+                opt.Password.RequiredLength = 4;
+                opt.Password.RequireNonAlphanumeric = false;
+                opt.Password.RequireUppercase = false;
+                
             });
-            
-            services.AddCors();
-            services.AddSignalR();
-            services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
-            services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
-            services.AddAutoMapper();
-            services.AddTransient<TrialData>();
-            services.AddScoped<IAuthRepository,AuthRepository>();
-            services.AddScoped<IZwajRepository, ZwajRepository>();
-            services.AddScoped<LogUserActivity>();
+            identityBuilder = new IdentityBuilder (identityBuilder.UserType,typeof(Role),identityBuilder.Services);
+            identityBuilder.AddEntityFrameworkStores<DataContext>();
+            identityBuilder.AddRoleValidator<RoleValidator<Role>>();
+            identityBuilder.AddRoleManager<RoleManager<Role>>();
+            identityBuilder.AddSignInManager<SignInManager<User>>();
+
             //Authentication MiddleWare
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(Options => {
@@ -64,6 +66,33 @@ namespace ZwajApp.API
                     ValidateAudience = false
                 };
             });
+
+            services.AddAuthorization(options => {
+                options.AddPolicy("RequiredAdminRole", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("ModeratePhotoRole", policy => policy.RequireRole("Admin","Moderator"));
+                options.AddPolicy("VIPOnly", policy => policy.RequireRole("VIP"));
+            });
+            services.AddMvc(optiona => {
+                var policy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser().Build();
+                optiona.Filters.Add(new AuthorizeFilter(policy));
+                
+                
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+            .AddJsonOptions(option =>{
+                option.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });
+            
+            services.AddCors();
+            services.AddSignalR();
+            services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
+            services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
+            services.AddAutoMapper();
+            //Mapper.Reset();
+            services.AddTransient<TrialData>();
+            services.AddScoped<IZwajRepository, ZwajRepository>();
+            services.AddScoped<LogUserActivity>();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -91,7 +120,7 @@ namespace ZwajApp.API
                 });
                 //app.UserHsts();
             }
-            // app.UseHttpRedirection();
+            //app.UseHttpRedirection();
             //trialData.TrialUsers();
             app.UseHttpsRedirection();
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials());

@@ -9,7 +9,7 @@ using ZwajApp.API.Data;
 
 namespace ZwajApp.API.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ValuesController : ControllerBase
@@ -22,20 +22,22 @@ namespace ZwajApp.API.Controllers
         }
         // GET http://localhost:5000/api/values
         // GET api/values
-        [AllowAnonymous]
+        //[AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetValues()
         {
             var values = await _context.Values.ToListAsync();
             return Ok(values);
         }
 
         // GET api/values/5
-        [AllowAnonymous]
+        //[AllowAnonymous]
+        [Authorize(Roles = "Member")]
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> GetValue(int id)
         {
-            var value = await _context.Values.FirstOrDefaultAsync(x=>x.Id==id) ;
+            var value = await _context.Values.FirstOrDefaultAsync(x => x.Id == id) ;
             return Ok(value);
         }
 

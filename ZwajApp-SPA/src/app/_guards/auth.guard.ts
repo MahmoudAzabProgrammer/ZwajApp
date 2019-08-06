@@ -10,7 +10,16 @@ import { AuthService } from '../_services/auth.service';
 export class AuthGuard implements CanActivate {
 
   constructor(private authService: AuthService , private router: Router , private alertify: AlertifyService) {}
-  canActivate(): boolean {
+  canActivate(next: ActivatedRouteSnapshot): boolean {
+    const roles = next.firstChild.data['roles'] as Array<String>;
+    if(roles){
+      const match = this.authService.roleMatch(roles);
+      if(match){
+        return true;
+      }else{
+        this.router.navigate(['members']);
+      }
+    }
     if(this.authService.loggedIn()) {
         this.authService.hubConnection.stop();
       return true;
