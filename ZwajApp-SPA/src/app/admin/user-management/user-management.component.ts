@@ -4,6 +4,7 @@ import { AdminService } from 'src/app/_services/admin.service';
 import { AlertifyService } from 'src/app/_services/alertify.service';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap';
 import { RolesModalComponent } from '../roles-modal/roles-modal.component';
+import { UserService } from 'src/app/_services/user.service';
 
 @Component({
   selector: 'app-user-management',
@@ -11,9 +12,10 @@ import { RolesModalComponent } from '../roles-modal/roles-modal.component';
   styleUrls: ['./user-management.component.css']
 })
 export class UserManagementComponent implements OnInit {
-  users:User[];
+  users: User[];
+  userId: number;
   bsModalRef: BsModalRef;
-  constructor(private adminService:AdminService, private alertify: AlertifyService, private modalService: BsModalService) { }
+  constructor(private adminService: AdminService, private alertify: AlertifyService, private modalService: BsModalService, private userService: UserService) { }
 
   ngOnInit() {
     this.getUsersWithRoles();
@@ -77,5 +79,12 @@ export class UserManagementComponent implements OnInit {
     })
     return roles;
   }
+  getUserReport(){
+    this.userService.getReportForUser(this.userId).subscribe((response) => {
+      let file = new Blob([response], { type: 'application/pdf' });
+      var fileURL = URL.createObjectURL(file);
+      window.open(fileURL, '_blank');
+        })
+}
 
 }

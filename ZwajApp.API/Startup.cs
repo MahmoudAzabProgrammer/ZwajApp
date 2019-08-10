@@ -25,6 +25,8 @@ using Stripe;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using DinkToPdf.Contracts;
+using DinkToPdf;
 
 namespace ZwajApp.API
 {
@@ -82,7 +84,7 @@ namespace ZwajApp.API
             .AddJsonOptions(option =>{
                 option.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
-            
+            services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
             services.AddCors();
             services.AddSignalR();
             services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));

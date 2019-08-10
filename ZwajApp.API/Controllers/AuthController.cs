@@ -52,10 +52,10 @@ namespace ZwajApp.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserForLoginDto userForLoginDto)
         {
-            var user = await _userManager.FindByNameAsync(userForLoginDto.Username);
+            var user = await _userManager.FindByNameAsync(userForLoginDto.UserName);
             var result = await _signInManager.CheckPasswordSignInAsync(user, userForLoginDto.Password,false);
             if(result.Succeeded){
-                var appUser = await _userManager.Users.Include(p => p.Photos).FirstOrDefaultAsync(u => u.NormalizedUserName == userForLoginDto.Username.ToUpper());
+                var appUser = await _userManager.Users.Include(p => p.Photos).FirstOrDefaultAsync(u => u.NormalizedUserName == userForLoginDto.UserName.ToUpper());
                 var userForReturn = _mapper.Map<UserForListDto>(appUser);
                 return Ok(new
                 {

@@ -26,6 +26,11 @@ namespace ZwajApp.API.Data
             _context.Remove(entity);
         }
 
+        public async Task<ICollection<User>> GetAllUsersExceptAdmin()
+        {
+            return await _context.Users.OrderBy(u=>u.NormalizedUserName).Where(u=>u.NormalizedUserName!="ADMIN").ToListAsync();
+        }
+
         public async Task<IEnumerable<Message>> GetConversation(int userId, int recipientId)
         {
            var messages = await _context.Messages.Include(m => m.Sender).ThenInclude(u => u.Photos).Include(m => m.Recipient).ThenInclude(u => u.Photos)
@@ -37,6 +42,27 @@ namespace ZwajApp.API.Data
         public async Task<Like> GetLike(int userId, int recipientId)
         {
             return await _context.Likes.FirstOrDefaultAsync(l => l.LikerId == userId && l.LikeeId == recipientId);
+        }
+
+       public async Task<ICollection<User>> GetLikersOrLikees(int userId, string type)
+        {
+            var users = _context.Users.Include(u=>u.Photos).OrderBy(u=>u.UserName).AsQueryable();
+            if(type=="likers")
+           {
+               var userLikers = await GetUserLikes(userId,true);
+               users =  users.Where(u=>userLikers.Contains(u.Id));
+           }
+           else if(type=="likees")
+           {
+               var userLikees = await GetUserLikes(userId,false);
+               users =  users.Where(u=>userLikees.Contains(u.Id));
+           }
+           else{
+               throw new Exception("لا توجد بيانات متاحة");
+           }
+
+           return users.ToList();
+            
         }
 
         public async Task<Photo> GetMainPhotoForUser(int userId)

@@ -28,7 +28,7 @@ export class PaymentComponent implements OnInit,OnDestroy,AfterViewInit {
   successPaid:boolean=false;
   loader:boolean=false;
 
-  constructor(private cd: ChangeDetectorRef, private userService:UserService,private authService:AuthService , private location:Location,private route:ActivatedRoute) {}
+  constructor(private cd: ChangeDetectorRef, private userService:UserService,public authService:AuthService , private location:Location,private route:ActivatedRoute) {}
 
   ngAfterViewInit() {
     

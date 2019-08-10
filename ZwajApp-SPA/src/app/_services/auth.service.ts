@@ -23,7 +23,25 @@ export class AuthService {
   latestUnreadCount = this.unreadCount.asObservable();
   hubConnection: HubConnection = new HubConnectionBuilder().withUrl("http://localhost:5000/chat").build();
   paid: boolean = false;
-constructor(private http: HttpClient) { }
+  siteLang: string = 'ar';
+  dir: string = 'rtl';
+  language = new BehaviorSubject<string>('ar');
+  lang = this.language.asObservable();
+
+constructor(private http: HttpClient) {
+  this.lang.subscribe(
+    lang => {
+       if(lang == 'en') {
+         this.dir = 'ltr';
+         this.siteLang = 'en';
+       }
+       else{
+         this.dir = 'rtl';
+         this.siteLang = 'ar';
+       }
+    }
+  );
+ }
 
 changeMemberPhoto(newPhotoUrl: string) {
   this.photoUrl.next(newPhotoUrl);
@@ -59,7 +77,7 @@ login(model: any) {
       let isMatch = false;
       const userRoles = this.decodedToken.role as Array<String>;
       allowRoles.forEach(element =>{
-        if(userRoles.includes(element)){
+        if(userRoles.includes(element)) {
           isMatch = true;
           return;
 

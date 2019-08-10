@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -24,8 +27,10 @@ namespace ZwajApp.API.Controllers
         private readonly IZwajRepository _repo;
         private readonly IMapper _mapper;
         private readonly IOptions<StripeSettings> _stripeSettings;
-        public UsersController(IZwajRepository repo, IMapper mapper, IOptions<StripeSettings> stripeSettings)
+        private readonly IConverter _converter;
+        public UsersController(IZwajRepository repo, IMapper mapper, IOptions<StripeSettings> stripeSettings, IConverter converter)
         {
+            _converter = converter;
             _stripeSettings = stripeSettings;
             _mapper = mapper;
             _repo = repo;
@@ -35,7 +40,7 @@ namespace ZwajApp.API.Controllers
         public async Task<IActionResult> GetUsers([FromQuery]UserParams userParams)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            var userFromRepo = await _repo.GetUser(currentUserId,true);
+            var userFromRepo = await _repo.GetUser(currentUserId, true);
             userParams.UserId = currentUserId;
             if (string.IsNullOrEmpty(userParams.Gender))
             {
@@ -63,7 +68,7 @@ namespace ZwajApp.API.Controllers
         {
             if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
                 return Unauthorized();
-            var userFromRepo = await _repo.GetUser(id,true);
+            var userFromRepo = await _repo.GetUser(id, true);
             _mapper.Map(userForUpdateDto, userFromRepo);
             if (await _repo.SaveAll())
             {
@@ -80,7 +85,7 @@ namespace ZwajApp.API.Controllers
             var like = await _repo.GetLike(id, recipientId);
             if (like != null)
                 return BadRequest("لقد قمت بالاعجاب بالمشترك من قبل");
-            if (await _repo.GetUser(recipientId,false) == null)
+            if (await _repo.GetUser(recipientId, false) == null)
                 return NotFound();
             like = new Like
             {
@@ -100,10 +105,10 @@ namespace ZwajApp.API.Controllers
         {
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
                 return Unauthorized();
-            
+
             var customers = new CustomerService();
             var charges = new ChargeService();
-			
+
             // var options = new TokenCreateOptions
             // {
             // Card = new CreditCardOptions
@@ -118,20 +123,23 @@ namespace ZwajApp.API.Controllers
             // var service = new TokenService();
             // Token stripeToken = service.Create(options);
 
-            var customer = customers.Create(new CustomerCreateOptions {
-            SourceToken = stripeToken
+            var customer = customers.Create(new CustomerCreateOptions
+            {
+                SourceToken = stripeToken
             });
 
-            var charge = charges.Create(new ChargeCreateOptions {
-            Amount = 5000,
-            Description = "إشتراك مدى الحياة",
-            Currency = "usd",
-            CustomerId = customer.Id
+            var charge = charges.Create(new ChargeCreateOptions
+            {
+                Amount = 5000,
+                Description = "إشتراك مدى الحياة",
+                Currency = "usd",
+                CustomerId = customer.Id
             });
 
-            var payment = new Payment{
+            var payment = new Payment
+            {
                 PaymentDate = DateTime.Now,
-                Amount = charge.Amount/100,
+                Amount = charge.Amount / 100,
                 UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value),
                 ReceiptUrl = charge.ReceiptUrl,
                 Description = charge.Description,
@@ -139,19 +147,63 @@ namespace ZwajApp.API.Controllers
                 IsPaid = charge.Paid
             };
             _repo.Add<Payment>(payment);
-            if(await _repo.SaveAll()){
-           return Ok(new {IsPaid = charge.Paid } );
+            if (await _repo.SaveAll())
+            {
+                return Ok(new { IsPaid = charge.Paid });
             }
-            
+
             return BadRequest("فشل في السداد");
 
         }
         [HttpGet("{userId}/payment")]
-        public async Task<IActionResult> GetPaymentForUser(int userId){
+        public async Task<IActionResult> GetPaymentForUser(int userId)
+        {
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
                 return Unauthorized();
             var payment = await _repo.GetPaymentForUser(userId);
             return Ok(payment);
+        }
+        //RequiredAdminRole
+        [Authorize(Policy = "RequiredAdminRole")]
+        [HttpGet("UserReport/{userId}")]
+        public IActionResult CreatePdfForUser(int userId)
+        {
+            var templateGenerator = new TemplateGenerator(_repo, _mapper);
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Portrait,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 15, Bottom = 20 },
+                DocumentTitle = "بطاقة مشترك"
+
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = templateGenerator.GetHTMLStringForUser(userId),
+                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "styles.css") },
+                HeaderSettings = { FontName = "Impact", FontSize = 12, Spacing = 5, Line = false },
+                FooterSettings = { FontName = "Geneva", FontSize = 15, Spacing = 7, Line = true, Center = "ZwajApp By Eng Muhammad Awadallah", Right = "[page]" }
+            };
+
+            var pdf = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings }
+            };
+
+            var file = _converter.Convert(pdf);
+            return File(file, "application/pdf");
+        }
+        
+        [Authorize(Policy = "ModeratePhotoRole")]
+        [HttpGet("GetAllUsersExceptAdmin")]
+        public async Task<IActionResult> GetAllUsersExceptAdmin(){
+            var users = await _repo.GetAllUsersExceptAdmin();
+            var usersToReturn = _mapper.Map<IEnumerable<UserForListDto>>(users);
+            return Ok(usersToReturn);
         }
     }
 
